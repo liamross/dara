@@ -12,5 +12,10 @@ However as I develop it I hope to diverge from both in order to achieve a
 simpler syntax and no semicolons (probably using the same smart placement as Go
 uses).
 
+## Usage
+
+If you clone the repo, you can run the _repl_ by compiling to binary, or running
+go run main.go. More to come.
+
 > Dara is second in Irish, since this language follows in the footsteps of Lox
 > and Monkey.
