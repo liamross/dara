@@ -1,6 +1,6 @@
 # Dara language
 
-This is a purely for-fun dynamically-typed language that is a WORK IN PROGRESS.
+This is a purely for-fun dynamically-typed language that is a 🚧WORK IN PROGRESS 🚧.
 
 I'm using it to learn how to write interpreters + compilers for fun. It will use
 elements from both Lox (from the book
@@ -16,6 +16,22 @@ uses).
 
 If you clone the repo, you can run the _repl_ by compiling to binary, or running
 go run main.go. More to come.
+
+Current Dara syntax:
+
+```rust
+let add = fn(a, b) {
+    return a + b;
+};
+```
+
+Goal Dara syntax:
+
+```rust
+add = fn(a, b) {
+    return a + b
+}
+```
 
 > Dara is second in Irish, since this language follows in the footsteps of Lox
 > and Monkey.
