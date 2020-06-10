@@ -7,6 +7,10 @@ type Token struct {
 	Literal string
 }
 
+func New(tokenType TokenType, literal string) *Token {
+	return &Token{tokenType, literal}
+}
+
 const (
 	ILLEGAL TokenType = "ILLEGAL"
 	EOF     TokenType = "EOF"
@@ -15,6 +19,7 @@ const (
 	// Identifiers and literals.
 	IDENT  TokenType = "IDENT"
 	NUMBER TokenType = "NUMBER"
+	STRING TokenType = "STRING"
 
 	// Operators.
 	ASSIGN   TokenType = "="
@@ -28,6 +33,8 @@ const (
 
 	EQ     TokenType = "=="
 	NOT_EQ TokenType = "!="
+	GT_EQ  TokenType = ">="
+	LT_EQ  TokenType = "<="
 
 	// Delimiters.
 	COMMA     TokenType = ","
