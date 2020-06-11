@@ -88,7 +88,9 @@ if (5 <= 10) {
 
 /* comment */10
 
-10 == "10"; 10 != '9';`
+10 == "10"; 10 != '9';
+
+% and or`
 	tests := []tokenTest{
 		// 0
 		{token.LET, "let"},
@@ -178,7 +180,7 @@ if (5 <= 10) {
 		{token.COMMENT, "comment"},
 		{token.NUMBER, "10"},
 
-		// 68
+		// 70
 		{token.NUMBER, "10"},
 		{token.EQ, "=="},
 		{token.STRING, "10"},
@@ -187,6 +189,11 @@ if (5 <= 10) {
 		{token.NOT_EQ, "!="},
 		{token.STRING, "9"},
 		{token.SEMICOLON, ";"},
+
+		// 78
+		{token.MOD, "%"},
+		{token.AND, "and"},
+		{token.OR, "or"},
 
 		{token.EOF, ""},
 	}

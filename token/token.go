@@ -30,6 +30,7 @@ const (
 	SLASH    TokenType = "/"
 	LT       TokenType = "<"
 	GT       TokenType = ">"
+	MOD      TokenType = "%"
 
 	EQ     TokenType = "=="
 	NOT_EQ TokenType = "!="
@@ -52,6 +53,8 @@ const (
 	FALSE    TokenType = "FALSE"
 	IF       TokenType = "IF"
 	ELSE     TokenType = "ELSE"
+	AND      TokenType = "AND"
+	OR       TokenType = "OR"
 	RETURN   TokenType = "RETURN"
 )
 
@@ -62,6 +65,8 @@ var keywords = map[string]TokenType{
 	"false":  FALSE,
 	"if":     IF,
 	"else":   ELSE,
+	"and":    AND,
+	"or":     OR,
 	"return": RETURN,
 }
 
