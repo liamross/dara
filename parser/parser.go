@@ -110,6 +110,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseLetStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.IF:
+		return p.parseIfStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -129,7 +131,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	// TODO: Skip expressions until semicolons
-	for !p.currTokenIs(token.SEMICOLON) {
+	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -142,7 +144,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	// TODO: Skip expressions until semicolons
-	for !p.currTokenIs(token.SEMICOLON) {
+	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -154,7 +156,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 	stmt.Expression = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peek(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -193,7 +195,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseBoolean() ast.Expression {
-	return &ast.Boolean{Token: p.curToken, Value: p.currTokenIs(token.TRUE)}
+	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression {
@@ -206,6 +208,54 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseIfStatement() *ast.IfStatement {
+	expression := &ast.IfStatement{Token: p.curToken}
+
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if !p.peekMatch(token.LBRACE) {
+		return nil
+	}
+
+	expression.Consequence = p.parseBlockStatement()
+
+	if p.peek(token.ELSE) {
+		p.nextToken()
+
+		switch {
+		case p.peek(token.IF):
+			p.nextToken()
+			expression.Alternative = p.parseIfStatement()
+		case p.peek(token.LBRACE):
+			p.nextToken()
+			expression.Alternative = p.parseBlockStatement()
+		default:
+			p.peekError(token.IF, token.LBRACE)
+			return nil
+		}
+	}
+
+	return expression
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: p.curToken}
+	block.Statements = []ast.Statement{}
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+		p.nextToken()
+	}
+
+	return block
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
@@ -230,7 +280,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 	leftExp := prefix()
 
-	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
+	for !p.peek(token.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
 			return leftExp
@@ -244,10 +294,21 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
-func (p *Parser) peekError(t token.TokenType) {
+func (p *Parser) peekError(t ...token.TokenType) {
 	line := p.l.Position()
+	expected := func() string {
+		joined := ""
+		for i := 0; i < len(t); i++ {
+			toAdd := string(t[i])
+			if i > 0 {
+				toAdd = " or " + toAdd
+			}
+			joined += toAdd
+		}
+		return joined
+	}()
 	msg := fmt.Sprintf("line %d: expected next token to be %s, received %s",
-		line, t, p.peekToken.Type)
+		line, expected, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
@@ -266,16 +327,16 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
-func (p *Parser) currTokenIs(t token.TokenType) bool {
+func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t
 }
 
-func (p *Parser) peekTokenIs(t token.TokenType) bool {
+func (p *Parser) peek(t token.TokenType) bool {
 	return p.peekToken.Type == t
 }
 
 func (p *Parser) peekMatch(t token.TokenType) bool {
-	if p.peekTokenIs(t) {
+	if p.peek(t) {
 		p.nextToken()
 		return true
 	}

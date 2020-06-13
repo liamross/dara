@@ -23,6 +23,8 @@ go run main.go. More to come.
 - has `>=` and `<=` (like Lox, Monkey does not include tokens for those )
 - supports `//` and `/**/` style comments (Monkey has no comments, Lox only had `//`)
 - supports `%` (modulo - not supported by either language)
+- no brackets around if conditions (not supported by either language)
+- if is a statement rather than an expression in order to support `else if`
 
 > Dara is second in Irish, since this language follows in the footsteps of Lox
 > and Monkey.
@@ -37,9 +39,9 @@ let add = fn(a, b) {
     return a + b;
 }
 
-if (add(five, num) > 2) {
+if add(five, num) > 2 {
     num = 1;
-} else {
+} else if five > num {
     num = 2;
 }
 
@@ -53,17 +55,15 @@ if (1 >= 2 <= 3 > 4 < -(5 % 6) == 7 && true || false) {
 
 ## Goal syntax of Dara (fingers crossed)
 
-```rust
+```go
+// Using := to indicate initialization, and = to indicate assignment.
 five := 5
 num := 1.234
 
+num = 1.2345
+
+// No semicolons!
 add := fn(a, b) {
     a + b
-}
-
-if add(five, num) > 2 {
-    num = 1
-} else {
-    num = 2
 }
 ```
