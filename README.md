@@ -25,6 +25,7 @@ go run main.go. More to come.
 - supports `%` (modulo - not supported by either language)
 - no brackets around if conditions (not supported by either language)
 - if is a statement rather than an expression in order to support `else if`
+  (Monkey has if as an expression which did not easily support `else if`)
 
 > Dara is second in Irish, since this language follows in the footsteps of Lox
 > and Monkey.
@@ -64,6 +65,6 @@ num = 1.2345
 
 // No semicolons!
 add := fn(a, b) {
-    a + b
+    return a + b
 }
 ```
