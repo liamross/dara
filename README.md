@@ -46,7 +46,7 @@ if (add(five, num) > 2) {
 /* The following is just to get all the possible characters out: */
 // And both types of comments!
 
-if (1 >= 2 <= 3 > 4 < (5 % 6) == 7 and true or false) {
+if (1 >= 2 <= 3 > 4 < -(5 % 6) == 7 && true || false) {
     callSomeFunction();
 }
 ```
@@ -54,10 +54,10 @@ if (1 >= 2 <= 3 > 4 < (5 % 6) == 7 and true or false) {
 ## Goal syntax of Dara (fingers crossed)
 
 ```rust
-five = 5
-num = 1.234
+five := 5
+num := 1.234
 
-add = fn(a, b) {
+add := fn(a, b) {
     a + b
 }
 

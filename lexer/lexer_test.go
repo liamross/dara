@@ -90,7 +90,7 @@ if (5 <= 10) {
 
 10 == "10"; 10 != '9';
 
-% and or`
+% && ||`
 	tests := []tokenTest{
 		// 0
 		{token.LET, "let"},
@@ -192,8 +192,8 @@ if (5 <= 10) {
 
 		// 78
 		{token.MOD, "%"},
-		{token.AND, "and"},
-		{token.OR, "or"},
+		{token.AND, "&&"},
+		{token.OR, "||"},
 
 		{token.EOF, ""},
 	}

@@ -73,6 +73,16 @@ func (l *Lexer) NextToken() *token.Token {
 		tok = l.lookAhead('=', token.EQ, token.ASSIGN)
 	case '!':
 		tok = l.lookAhead('=', token.NOT_EQ, token.BANG)
+	case '&':
+		if l.peek() == '&' {
+			l.advance()
+			tok = token.New(token.AND, "&&")
+		}
+	case '|':
+		if l.peek() == '|' {
+			l.advance()
+			tok = token.New(token.OR, "||")
+		}
 
 	case '/':
 		switch l.peek() {

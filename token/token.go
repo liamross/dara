@@ -36,6 +36,8 @@ const (
 	NOT_EQ TokenType = "!="
 	GT_EQ  TokenType = ">="
 	LT_EQ  TokenType = "<="
+	AND    TokenType = "&&"
+	OR     TokenType = "||"
 
 	// Delimiters.
 	COMMA     TokenType = ","
@@ -53,8 +55,6 @@ const (
 	FALSE    TokenType = "FALSE"
 	IF       TokenType = "IF"
 	ELSE     TokenType = "ELSE"
-	AND      TokenType = "AND"
-	OR       TokenType = "OR"
 	RETURN   TokenType = "RETURN"
 )
 
@@ -65,8 +65,6 @@ var keywords = map[string]TokenType{
 	"false":  FALSE,
 	"if":     IF,
 	"else":   ELSE,
-	"and":    AND,
-	"or":     OR,
 	"return": RETURN,
 }
 
