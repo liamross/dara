@@ -40,26 +40,43 @@ type Statement interface {
 	statementNode()
 }
 
-type LetStatement struct {
+type DeclareStatement struct {
 	Token token.Token
 	Name  *Identifier
 	Value Expression
 }
 
-func (ls *LetStatement) statementNode()       {}
-func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
-func (ls *LetStatement) String() string {
+func (ds *DeclareStatement) statementNode()       {}
+func (ds *DeclareStatement) TokenLiteral() string { return ds.Token.Literal }
+func (ds *DeclareStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ls.TokenLiteral() + " ")
-	out.WriteString(ls.Name.String())
-	out.WriteString(" = ")
+	out.WriteString(ds.Name.String())
 
-	if ls.Value != nil {
-		out.WriteString(ls.Value.String())
+	if _, ok := ds.Value.(*Nil); !ok {
+		out.WriteString(" " + ds.TokenLiteral() + " ")
+		out.WriteString(ds.Value.String())
 	}
 
 	out.WriteString(";")
+
+	return out.String()
+}
+
+type AssignStatement struct {
+	Token token.Token
+	Name  *Identifier
+	Value Expression
+}
+
+func (as *AssignStatement) statementNode()       {}
+func (as *AssignStatement) TokenLiteral() string { return as.Token.Literal }
+func (as *AssignStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(as.Name.String())
+	out.WriteString(" = ")
+	out.WriteString(as.Value.String())
 
 	return out.String()
 }
@@ -214,6 +231,14 @@ type Boolean struct {
 func (b *Boolean) expressionNode()      {}
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
 func (b *Boolean) String() string       { return b.Token.Literal }
+
+type Nil struct {
+	Token token.Token
+}
+
+func (n *Nil) expressionNode()      {}
+func (n *Nil) TokenLiteral() string { return n.Token.Literal }
+func (n *Nil) String() string       { return n.Token.Literal }
 
 type StringLiteral struct {
 	Token token.Token

@@ -8,8 +8,8 @@ import (
 func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
-			&LetStatement{
-				Token: token.Token{Type: token.LET, Literal: "let"},
+			&DeclareStatement{
+				Token: token.Token{Type: token.DECLARE, Literal: ":="},
 				Name: &Identifier{
 					Token: token.Token{Type: token.IDENT, Literal: "a"},
 					Value: "a",
@@ -22,7 +22,7 @@ func TestString(t *testing.T) {
 		},
 	}
 
-	if s := program.String(); s != "let a = b;" {
+	if s := program.String(); s != "a := b;" {
 		t.Errorf("program.String() wrong. Got: %q", s)
 	}
 }

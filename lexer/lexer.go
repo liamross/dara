@@ -77,11 +77,22 @@ func (l *Lexer) NextToken() *token.Token {
 		if l.peek() == '&' {
 			l.advance()
 			tok = token.New(token.AND, "&&")
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	case '|':
 		if l.peek() == '|' {
 			l.advance()
 			tok = token.New(token.OR, "||")
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
+		}
+	case ':':
+		if l.peek() == '=' {
+			l.advance()
+			tok = token.New(token.DECLARE, ":=")
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
 		}
 
 	case '/':

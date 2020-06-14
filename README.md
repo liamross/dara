@@ -1,70 +1,74 @@
 # Dara language
 
-This is a purely for-fun dynamically-typed language that is a 🚧WORK IN PROGRESS 🚧.
+A super simple dynamic language with a focus on simplicity and writing speed.
 
-I'm using it to learn how to write interpreters + compilers for fun. It will use
-elements from both Lox (from the book
-[Crafting Interpreters](https://craftinginterpreters.com/) and Monkey (from the
-book [Writing an Interpreter in Go](https://interpreterbook.com/)), since I am
-using these resources to learn.
+## Why
 
-However as I develop it I hope to diverge from both in order to achieve a
-simpler syntax and no semicolons (probably using the same smart placement as Go
-uses).
+This is a purely for-fun language that I am building to learn how to write a
+fully-featured interpreter and compiler. The core architecture was written while
+learning from three sources:
+
+- [Writing an Interpreter in Go](https://interpreterbook.com/)
+- [Crafting Interpreters](https://craftinginterpreters.com/)
+- [Go Source Code](https://github.com/golang/go/tree/master/src/go)
+
+However, it differs from all these languages in syntax and features (see below).
+
+## TODO
+
+- [ ] Implement parsing objects and arrays
+- [ ] **Remove all semicolons**
+- [ ] Build an evaluator
+- [ ] Complete REPL
+- [ ] Build a compiler (stretch goal)
+
+## Completed
+
+- [x] Lexer
+- [x] Most of the parser
+- [x] Basic REPL (only prints tokens though)
 
 ## Usage
 
 If you clone the repo, you can run the _repl_ by compiling to binary, or running
 go run main.go. More to come.
 
-## Key features (compared to Monkey and Lox)
+## Current Valid Dara (subject to change wildly)
 
-- has full number support (like Lox, Monkey only supports integers)
-- has `>=` and `<=` (like Lox, Monkey does not include tokens for those )
-- supports `//` and `/**/` style comments (Monkey has no comments, Lox only had `//`)
-- supports `%` (modulo - not supported by either language)
-- no brackets around if conditions (not supported by either language)
-- if is a statement rather than an expression in order to support `else if`
-  (Monkey has if as an expression which did not easily support `else if`)
+```go
+// Declare values with `:=` (no declaration keyword).
+five := 5;
+num := 1.234;
 
-> Dara is second in Irish, since this language follows in the footsteps of Lox
-> and Monkey.
+// Dara uses `nil` to indicate the absence of a value.
+other := nil;
 
-## Example of valid Dara (currently only the lexer is implemented though, will update with changed plans)
+// Can declare an identifier without assigning a value. Value will be `nil`.
+add;
 
-```rust
-let five = 5;
-let num = 1.234;
-
-let add = fn(a, b) {
+// Assign values to existing identifiers using `=`. Functions are values.
+add = fn(a, b) {
     return a + b;
 }
 
-if add(five, num) > 2 {
+// No brackets around the logic in if statements.
+if 1 > 2 {
     num = 1;
-} else if five > num {
+} else if five > 2 {
     num = 2;
 }
 
-/* The following is just to get all the possible characters out: */
-// And both types of comments!
+/* Dara also allows multi-line comments using c-style syntax. */
 
-if (1 >= 2 <= 3 > 4 < -(5 % 6) == 7 && true || false) {
-    callSomeFunction();
-}
-```
+// Available types:
+noValue := nil;
+string := "string";
+number := 1.234;
+function := fn(a, b) { return a + b };
 
-## Goal syntax of Dara (fingers crossed)
+// Available logical operators:
+// < > ! == != >= <= && ||
 
-```go
-// Using := to indicate initialization, and = to indicate assignment.
-five := 5
-num := 1.234
-
-num = 1.2345
-
-// No semicolons!
-add := fn(a, b) {
-    return a + b
-}
+// Available arithmetic operators:
+//  + - * / %
 ```

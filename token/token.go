@@ -32,12 +32,13 @@ const (
 	GT       TokenType = ">"
 	MOD      TokenType = "%"
 
-	EQ     TokenType = "=="
-	NOT_EQ TokenType = "!="
-	GT_EQ  TokenType = ">="
-	LT_EQ  TokenType = "<="
-	AND    TokenType = "&&"
-	OR     TokenType = "||"
+	EQ      TokenType = "=="
+	NOT_EQ  TokenType = "!="
+	GT_EQ   TokenType = ">="
+	LT_EQ   TokenType = "<="
+	AND     TokenType = "&&"
+	OR      TokenType = "||"
+	DECLARE TokenType = ":="
 
 	// Delimiters.
 	COMMA     TokenType = ","
@@ -50,22 +51,22 @@ const (
 
 	// Keywords.
 	FUNCTION TokenType = "FUNCTION"
-	LET      TokenType = "LET"
 	TRUE     TokenType = "TRUE"
 	FALSE    TokenType = "FALSE"
 	IF       TokenType = "IF"
 	ELSE     TokenType = "ELSE"
 	RETURN   TokenType = "RETURN"
+	NIL      TokenType = "NIL"
 )
 
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
-	"let":    LET,
 	"true":   TRUE,
 	"false":  FALSE,
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"nil":    NIL,
 }
 
 func LookupIdent(ident string) TokenType {

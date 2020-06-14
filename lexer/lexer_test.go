@@ -67,14 +67,14 @@ And more
 }
 
 func TestNextToken(t *testing.T) {
-	input := `let five5 = 5;
-let ten = 10.0;
+	input := `test := nil;
+ten := 10.0;
 
-let add = fn(x, y) {
+add = fn(x, y) {
   x + y;
 };
 
-let result = add(five, ten);
+result = add(five, ten);
 !-*/5;
 5 < 10 > 5 >= 10;
 
@@ -93,21 +93,18 @@ if (5 <= 10) {
 % && ||`
 	tests := []tokenTest{
 		// 0
-		{token.LET, "let"},
-		{token.IDENT, "five5"},
-		{token.ASSIGN, "="},
-		{token.NUMBER, "5"},
+		{token.IDENT, "test"},
+		{token.DECLARE, ":="},
+		{token.NIL, "nil"},
 		{token.SEMICOLON, ";"},
 
-		// 5
-		{token.LET, "let"},
+		// 4
 		{token.IDENT, "ten"},
-		{token.ASSIGN, "="},
+		{token.DECLARE, ":="},
 		{token.NUMBER, "10.0"},
 		{token.SEMICOLON, ";"},
 
-		// 10
-		{token.LET, "let"},
+		// 8
 		{token.IDENT, "add"},
 		{token.ASSIGN, "="},
 		{token.FUNCTION, "fn"},
@@ -124,8 +121,7 @@ if (5 <= 10) {
 		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 
-		// 26
-		{token.LET, "let"},
+		// 23
 		{token.IDENT, "result"},
 		{token.ASSIGN, "="},
 		{token.IDENT, "add"},
@@ -136,7 +132,7 @@ if (5 <= 10) {
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 
-		// 36
+		// 32
 		{token.BANG, "!"},
 		{token.MINUS, "-"},
 		{token.ASTERISK, "*"},
@@ -144,7 +140,7 @@ if (5 <= 10) {
 		{token.NUMBER, "5"},
 		{token.SEMICOLON, ";"},
 
-		// 42
+		// 38
 		{token.NUMBER, "5"},
 		{token.LT, "<"},
 		{token.NUMBER, "10"},
@@ -154,7 +150,7 @@ if (5 <= 10) {
 		{token.NUMBER, "10"},
 		{token.SEMICOLON, ";"},
 
-		// 50
+		// 46
 		{token.IF, "if"},
 		{token.LPAREN, "("},
 		{token.NUMBER, "5"},
@@ -173,14 +169,14 @@ if (5 <= 10) {
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 
-		// 67
+		// 63
 		{token.COMMENT, "10 == 10; 10 != 9;"},
 
-		// 68
+		// 64
 		{token.COMMENT, "comment"},
 		{token.NUMBER, "10"},
 
-		// 70
+		// 66
 		{token.NUMBER, "10"},
 		{token.EQ, "=="},
 		{token.STRING, "10"},
@@ -190,7 +186,7 @@ if (5 <= 10) {
 		{token.STRING, "9"},
 		{token.SEMICOLON, ";"},
 
-		// 78
+		// 74
 		{token.MOD, "%"},
 		{token.AND, "&&"},
 		{token.OR, "||"},
@@ -201,11 +197,10 @@ if (5 <= 10) {
 }
 
 func TestScan(t *testing.T) {
-	input := `let test = 5.2;`
+	input := `test := 5.2;`
 	tests := []tokenTest{
-		{token.LET, "let"},
 		{token.IDENT, "test"},
-		{token.ASSIGN, "="},
+		{token.DECLARE, ":="},
 		{token.NUMBER, "5.2"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
