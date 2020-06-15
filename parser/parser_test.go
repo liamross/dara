@@ -172,7 +172,7 @@ func TestStringLiteralExpression(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `if x < y { x }`
+	input := `if x < y { x; }`
 
 	var (
 		l       = lexer.New(input)

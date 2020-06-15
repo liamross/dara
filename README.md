@@ -14,6 +14,13 @@ learning from three sources:
 
 However, it differs from all these languages in syntax and features (see below).
 
+## Completed
+
+- [x] Lexer
+- [x] Error reporting with line-level accuracy
+- [x] Most of the parser
+- [x] Basic REPL (only prints parser results at the moment, so RPPL?)
+
 ## TODO
 
 - [ ] Implement parsing objects and arrays
@@ -21,12 +28,7 @@ However, it differs from all these languages in syntax and features (see below).
 - [ ] Build an evaluator
 - [ ] Complete REPL
 - [ ] Build a compiler (stretch goal)
-
-## Completed
-
-- [x] Lexer
-- [x] Most of the parser
-- [x] Basic REPL (only prints tokens though)
+- [ ] Improve error messaging, and have column-level accuracy (stretch goal)
 
 ## Usage
 

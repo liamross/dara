@@ -50,13 +50,13 @@ const (
 	RBRACE TokenType = "}"
 
 	// Keywords.
-	FUNCTION TokenType = "FUNCTION"
-	TRUE     TokenType = "TRUE"
-	FALSE    TokenType = "FALSE"
-	IF       TokenType = "IF"
-	ELSE     TokenType = "ELSE"
-	RETURN   TokenType = "RETURN"
-	NIL      TokenType = "NIL"
+	FUNCTION TokenType = "fn"
+	TRUE     TokenType = "true"
+	FALSE    TokenType = "false"
+	IF       TokenType = "if"
+	ELSE     TokenType = "else"
+	RETURN   TokenType = "return"
+	NIL      TokenType = "nil"
 )
 
 var keywords = map[string]TokenType{
