@@ -18,6 +18,10 @@ func Eval(node ast.Node) Object {
 		return evalStatements(node.Statements)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
+	case *ast.BlockStatement:
+		return evalStatements(node.Statements)
+	case *ast.IfStatement:
+		return evalIfStatement(node)
 
 	// Expressions
 	case *ast.NumberLiteral:
@@ -38,6 +42,22 @@ func Eval(node ast.Node) Object {
 	}
 
 	return nil
+}
+
+func evalIfStatement(is *ast.IfStatement) Object {
+	condition := Eval(is.Condition)
+
+	if condition.Type() != BOOLEAN_OBJ {
+		// TODO: error handling
+		return NIL
+	}
+	if condition == TRUE {
+		return Eval(is.Consequence)
+	}
+	if is.Alternative != nil {
+		return Eval(is.Alternative)
+	}
+	return NIL
 }
 
 func evalStatements(stmts []ast.Statement) Object {

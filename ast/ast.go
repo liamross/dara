@@ -137,7 +137,7 @@ type IfStatement struct {
 	Token       token.Token
 	Condition   Expression
 	Consequence *BlockStatement
-	Alternative Statement
+	Alternative Statement // BlockStatement or IfStatement or nil
 }
 
 func (is *IfStatement) statementNode()       {}

@@ -33,7 +33,7 @@ However, it differs from all these languages in syntax and features (see below).
 ## Usage
 
 If you clone the repo, you can run the _repl_ by compiling to binary, or running
-go run main.go. More to come.
+`go run main.go`. More to come.
 
 ## Current Valid Dara (subject to change wildly)
 

@@ -116,6 +116,34 @@ func TestBangOperator(t *testing.T) {
 	}
 }
 
+func TestIfElseExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"if true { 10 }", 10},
+		{"if false { 10 }", nil},
+		{"if true { 10 } else { 5 }", 10},
+		{"if false { 10 } else { 5 }", 5},
+		{"if true { 10 } else if false { 5 }", 10},
+		{"if false { 10 } else if true { 5 }", 5},
+		{"if false { 10 } else if false { 5 }", nil},
+		{"if true { 10 } else if false { 5 } else { 3 }", 10},
+		{"if false { 10 } else if true { 5 } else { 3 }", 5},
+		{"if false { 10 } else if false { 5 } else { 3 }", 3},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testNumberObject(t, evaluated, float64(integer))
+		} else {
+			testNilObject(t, evaluated)
+		}
+	}
+}
+
 func testNumberObject(t *testing.T, obj Object, expected float64) bool {
 	result, ok := obj.(*Number)
 	if !ok {
@@ -124,6 +152,14 @@ func testNumberObject(t *testing.T, obj Object, expected float64) bool {
 	}
 	if result.Value != expected {
 		t.Errorf("object has wrong value. got=%v, want=%v", result.Value, expected)
+		return false
+	}
+	return true
+}
+
+func testNilObject(t *testing.T, obj Object) bool {
+	if obj != NIL {
+		t.Errorf("object is not NIL. got=%T (%+v)", obj, obj)
 		return false
 	}
 	return true
