@@ -69,8 +69,12 @@ number := 1.234;
 function := fn(a, b) { return a + b };
 
 // Available logical operators:
-// < > ! == != >= <= && ||
+// < > ! == != >= <= && || (work on strings: < > == != >= <=)
 
 // Available arithmetic operators:
-//  + - * / %
+//  + - * / % (work on strings: +)
 ```
+
+## Other Language Quirks
+
+- no truthy or falsy values (must use explicit booleans)

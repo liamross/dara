@@ -2,6 +2,7 @@ package repl
 
 import (
 	"bufio"
+	"dara/evaluator"
 	"dara/lexer"
 	"dara/parser"
 	"fmt"
@@ -22,23 +23,26 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		var (
-			line    = scanner.Text()
-			l       = lexer.New(line)
-			p       = parser.New(l)
-			program = p.ParseProgram()
+			line = scanner.Text()
+			l    = lexer.New(line)
+			p    = parser.New(l)
 		)
 
+		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			continue
 		}
 
-		if _, err := io.WriteString(out, program.String()); err != nil {
-			log.Fatalln(err)
-		}
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			if _, err := io.WriteString(out, evaluated.Inspect()); err != nil {
+				log.Fatalln(err)
+			}
 
-		if _, err := io.WriteString(out, "\n"); err != nil {
-			log.Fatalln(err)
+			if _, err := io.WriteString(out, "\n"); err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
 }
