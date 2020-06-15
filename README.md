@@ -23,6 +23,8 @@ However, it differs from all these languages in syntax and features (see below).
 
 ## TODO
 
+- [ ] Add line numbers to evaluator error reporting (and then columns eventually
+  - see below)
 - [ ] Implement parsing objects and arrays
 - [ ] **Remove all semicolons**
 - [ ] Build an evaluator

@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"dara/ast"
+	"fmt"
 	"math"
 )
 
@@ -15,13 +16,16 @@ func Eval(node ast.Node) Object {
 	switch node := node.(type) {
 	// Statements
 	case *ast.Program:
-		return evalStatements(node.Statements)
+		return evalProgram(node)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
 	case *ast.BlockStatement:
-		return evalStatements(node.Statements)
+		return evalBlockStatement(node)
 	case *ast.IfStatement:
 		return evalIfStatement(node)
+	case *ast.ReturnStatement:
+		val := Eval(node.ReturnValue)
+		return &ReturnValue{Value: val}
 
 	// Expressions
 	case *ast.NumberLiteral:
@@ -44,12 +48,49 @@ func Eval(node ast.Node) Object {
 	return nil
 }
 
+func newError(format string, a ...interface{}) *Error {
+	return &Error{Message: fmt.Sprintf(format, a...)}
+}
+
+func evalProgram(program *ast.Program) Object {
+	var result Object
+
+	for _, statement := range program.Statements {
+		result = Eval(statement)
+
+		switch r := result.(type) {
+		case *ReturnValue:
+			return r.Value
+		case *Error:
+			return result
+		}
+	}
+
+	return result
+}
+
+func evalBlockStatement(block *ast.BlockStatement) Object {
+	var result Object
+
+	for _, statement := range block.Statements {
+		result = Eval(statement)
+
+		if result != nil {
+			if rt := result.Type(); rt == RETURN_VALUE_OBJ || rt == ERROR_OBJ {
+				return result
+			}
+		}
+	}
+
+	return result
+}
+
 func evalIfStatement(is *ast.IfStatement) Object {
 	condition := Eval(is.Condition)
 
 	if condition.Type() != BOOLEAN_OBJ {
-		// TODO: error handling
-		return NIL
+		return newError("type mismatch: non-boolean condition %s (%s) in if statement",
+			condition.Inspect(), condition.Type())
 	}
 	if condition == TRUE {
 		return Eval(is.Consequence)
@@ -58,16 +99,6 @@ func evalIfStatement(is *ast.IfStatement) Object {
 		return Eval(is.Alternative)
 	}
 	return NIL
-}
-
-func evalStatements(stmts []ast.Statement) Object {
-	var result Object
-
-	for _, statement := range stmts {
-		result = Eval(statement)
-	}
-
-	return result
 }
 
 func nativeBoolToBooleanObject(input bool) *Boolean {
@@ -84,8 +115,8 @@ func evalPrefixExpression(operator string, right Object) Object {
 	case "-":
 		return evalMinusPrefixOperatorExpression(right)
 	default:
-		// TODO: error handling
-		return NIL
+		return newError("invalid operation: operator %s is not defined for %s (%s)",
+			operator, right.Inspect(), right.Type())
 	}
 }
 
@@ -99,9 +130,11 @@ func evalInfixExpression(operator string, left, right Object) Object {
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
+	case left.Type() != right.Type():
+		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	default:
-		// TODO: error handling
-		return NIL
+		return newError("invalid operation: operator %s is not defined for %s (%s)",
+			operator, left.Inspect(), left.Type())
 	}
 }
 
@@ -112,15 +145,15 @@ func evalBangOperatorExpression(right Object) Object {
 	case FALSE:
 		return TRUE
 	default:
-		// TODO: error handling
-		return NIL
+		return newError("invalid operation: operator %s is not defined for %s (%s)",
+			"!", right.Inspect(), right.Type())
 	}
 }
 
 func evalMinusPrefixOperatorExpression(right Object) Object {
 	if right.Type() != NUMBER_OBJ {
-		// TODO: error handling
-		return NIL
+		return newError("invalid operation: operator %s is not defined for %s (%s)",
+			"-", right.Inspect(), right.Type())
 	}
 
 	value := right.(*Number).Value
@@ -157,8 +190,8 @@ func evalArithmeticInfixExpression(operator string, left, right Object) Object {
 	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
 	default:
-		// TODO: error handling
-		return NIL
+		return newError("invalid operation: operator %s is not defined for %s (%s)",
+			operator, right.Inspect(), right.Type())
 	}
 }
 
@@ -184,7 +217,7 @@ func evalStringInfixExpression(operator string, left, right Object) Object {
 	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
 	default:
-		// TODO: error handling
-		return NIL
+		return newError("invalid operation: operator %s is not defined for %s (%s)",
+			operator, left.Inspect(), left.Type())
 	}
 }

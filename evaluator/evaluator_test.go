@@ -144,6 +144,98 @@ func TestIfElseExpressions(t *testing.T) {
 	}
 }
 
+func TestReturnStatements(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"return 10;", 10},
+		{"return 10; 9;", 10},
+		{"return 2 * 5; 9;", 10},
+		{"9; return 2 * 5; 9;", 10},
+		{`if 10 > 1 {
+			if 10 > 1 {
+				return 10;
+			}
+			return 1;
+		}`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testNumberObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"5 + true;",
+			"type mismatch: number + boolean",
+		},
+		{
+			`5 + "a";`,
+			"type mismatch: number + string",
+		},
+		{
+			"5 + true; 5;",
+			"type mismatch: number + boolean",
+		},
+		{
+			"-true",
+			"invalid operation: operator - is not defined for true (boolean)",
+		},
+		{
+			"!10",
+			"invalid operation: operator ! is not defined for 10 (number)",
+		},
+		{
+			`"a" - "b"`,
+			"invalid operation: operator - is not defined for \"a\" (string)",
+		},
+		{
+			"true + false;",
+			"invalid operation: operator + is not defined for true (boolean)",
+		},
+		{
+			"5; true + false; 5",
+			"invalid operation: operator + is not defined for true (boolean)",
+		},
+		{
+			"if 10 > 1 { true + false; }",
+			"invalid operation: operator + is not defined for true (boolean)",
+		},
+		{
+			"if 10 { true + false; }",
+			"type mismatch: non-boolean condition 10 (number) in if statement",
+		},
+		{
+			`if 10 > 1 {
+				if 10 > 1 {
+					return true + false;
+				}
+				return 1;
+			}`,
+			"invalid operation: operator + is not defined for true (boolean)",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		errObj, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("no error object returned. got=%T (%+v)", evaluated, evaluated)
+			continue
+		}
+		if errObj.Message != tt.expected {
+			t.Errorf("wrong error message. expected=%q, got=%q", tt.expected, errObj.Message)
+		}
+	}
+}
+
 func testNumberObject(t *testing.T, obj Object, expected float64) bool {
 	result, ok := obj.(*Number)
 	if !ok {
