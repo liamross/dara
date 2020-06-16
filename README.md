@@ -1,40 +1,45 @@
 # Dara language
 
-A super simple dynamic language with a focus on simplicity and writing speed.
+A super simple dynamic language with a focus on conciseness and readability.
 
 ## Why
 
-This is a purely for-fun language that I am building to learn how to write a
-fully-featured interpreter and compiler. The core architecture was written while
-learning from three sources:
+Firstly, to learn how to write interpreters and compilers! The core architecture
+is being written while learning (primarily) from three sources:
 
 - [Writing an Interpreter in Go](https://interpreterbook.com/)
 - [Crafting Interpreters](https://craftinginterpreters.com/)
 - [Go Source Code](https://github.com/golang/go/tree/master/src/go)
 
-However, it differs from all these languages in syntax and features (see below).
+Secondly, to build a dynamic language syntax and usability that I personally
+like. It draws heavily on Go, JavaScript and Rust syntax (in that order) and
+aims to reduce the amount of code needed to achieve things, while maintaining
+high levels of readability.
 
-## Completed
+## Status
+
+### Completed
 
 - [x] Lexer
 - [x] Error reporting with line-level accuracy
 - [x] Most of the parser
-- [x] Basic REPL (only prints parser results at the moment, so RPPL?)
+- [x] Complete _REPL_ (only works on values implemented in evaluator though)
 
-## TODO
+### In progress
 
-- [ ] Add line numbers to evaluator error reporting (and then columns eventually
-  - see below)
+- [ ] Implement evaluator
 - [ ] Implement parsing objects and arrays
+
+### To Do (roughly in order)
+
+- [ ] Add line numbers to evaluator error reporting
 - [ ] **Remove all semicolons**
-- [ ] Build an evaluator
-- [ ] Complete REPL
 - [ ] Build a compiler (stretch goal)
-- [ ] Improve error messaging, and have column-level accuracy (stretch goal)
+- [ ] Improve all error messaging, and have column-level accuracy (stretch goal)
 
 ## Usage
 
-If you clone the repo, you can run the _repl_ by compiling to binary, or running
+If you clone the repo, you can run the _REPL_ by compiling to binary, or running
 `go run main.go`. More to come.
 
 ## Current Valid Dara (subject to change wildly)
@@ -55,7 +60,8 @@ add = fn(a, b) {
     return a + b;
 }
 
-// No brackets around the logic in if statements.
+// No brackets around the logic in if statements. No truthy or falsy values,
+// must use booleans in if statements.
 if 1 > 2 {
     num = 1;
 } else if five > 2 {
@@ -68,7 +74,7 @@ if 1 > 2 {
 noValue := nil;
 string := "string";
 number := 1.234;
-function := fn(a, b) { return a + b };
+function := fn(a, b) { return a + b; };
 
 // Available logical operators:
 // < > ! == != >= <= && || (work on strings: < > == != >= <=)
@@ -76,7 +82,3 @@ function := fn(a, b) { return a + b };
 // Available arithmetic operators:
 //  + - * / % (work on strings: +)
 ```
-
-## Other Language Quirks
-
-- no truthy or falsy values (must use explicit booleans)
