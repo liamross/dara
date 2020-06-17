@@ -11,10 +11,10 @@ is being written while learning (primarily) from three sources:
 - [Crafting Interpreters](https://craftinginterpreters.com/)
 - [Go Source Code](https://github.com/golang/go/tree/master/src/go)
 
-Secondly, to build a dynamic language syntax and usability that I personally
-like. It draws heavily on Go, JavaScript and Rust syntax (in that order) and
-aims to reduce the amount of code needed to achieve things, while maintaining
-high levels of readability.
+Secondly, to build a dynamic language syntax and utility that I would personally
+like to use. It draws heavily on Go, JavaScript and Rust syntax (in that order)
+and aims to reduce the amount of code needed to achieve things, while
+maintaining high levels of readability.
 
 ## Status
 
@@ -49,11 +49,10 @@ If you clone the repo, you can run the _REPL_ by compiling to binary, or running
 five := 5;
 num := 1.234;
 
-// Dara uses `nil` to indicate the absence of a value.
-other := nil;
-
-// Can declare an identifier without assigning a value. Value will be `nil`.
-add;
+// Dara uses `nil` to indicate the absence of a value. If you want to declare a
+// variable without assigning a value, use `:= nil`.
+// other;     // (not allowed)
+other := nil; // allowed
 
 // Assign values to existing identifiers using `=`. Functions are values.
 add = fn(a, b) {
@@ -77,8 +76,8 @@ number := 1.234;
 function := fn(a, b) { return a + b; };
 
 // Available logical operators:
-// < > ! == != >= <= && || (work on strings: < > == != >= <=)
+// < > ! == != >= <= && ||   (work on strings: < > == != >= <=)
 
 // Available arithmetic operators:
-//  + - * / % (work on strings: +)
+//  + - * / %                (work on strings: +)
 ```

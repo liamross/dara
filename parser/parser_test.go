@@ -43,75 +43,71 @@ func TestReturnStatements(t *testing.T) {
 	}
 }
 
-func TestDeclareStatement(t *testing.T) {
-	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      interface{}
-	}{
-		{"x := 5;", "x", 5},
-		{"y;", "y", nil},
-		{"foobar := y;", "foobar", "y"},
+func TestDeclareExpression(t *testing.T) {
+	input := "test := 5;"
+
+	var (
+		l       = lexer.New(input)
+		p       = New(l)
+		program = p.ParseProgram()
+	)
+
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("not enough statements in program. got=%d", len(program.Statements))
 	}
 
-	for _, tt := range tests {
-		var (
-			l       = lexer.New(tt.input)
-			p       = New(l)
-			program = p.ParseProgram()
-		)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
 
-		checkParserErrors(t, p)
+	ident, ok := stmt.Expression.(*ast.DeclareExpression)
+	if !ok {
+		t.Fatalf("exp not *ast.DeclareExpression. got=%T", stmt.Expression)
+	}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program.Statements does not contain 1 statement. got=%d", len(program.Statements))
-		}
+	if ident.Name.Value != "test" {
+		t.Errorf("identifier not %s. got=%s", "test", ident.Name.Value)
+	}
 
-		stmt := program.Statements[0]
-		if !testDeclareStatement(t, stmt, tt.expectedIdentifier) {
-			return
-		}
-
-		val := stmt.(*ast.DeclareStatement).Value
-		if !testLiteralExpression(t, val, tt.expectedValue) {
-			return
-		}
+	if ident.Value.TokenLiteral() != "5" {
+		t.Errorf("ident.TokenLiteral not %s. got=%s", "5", ident.TokenLiteral())
 	}
 }
 
 func TestAssignStatement(t *testing.T) {
-	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      interface{}
-	}{
-		{"x = 5;", "x", 5},
-		{"y = nil;", "y", nil},
-		{"foobar = y;", "foobar", "y"},
+	input := "test = 5;"
+
+	var (
+		l       = lexer.New(input)
+		p       = New(l)
+		program = p.ParseProgram()
+	)
+
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("not enough statements in program. got=%d", len(program.Statements))
 	}
 
-	for _, tt := range tests {
-		var (
-			l       = lexer.New(tt.input)
-			p       = New(l)
-			program = p.ParseProgram()
-		)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
 
-		checkParserErrors(t, p)
+	ident, ok := stmt.Expression.(*ast.AssignExpression)
+	if !ok {
+		t.Fatalf("exp not *ast.AssignExpression. got=%T", stmt.Expression)
+	}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program.Statements does not contain 1 statement. got=%d", len(program.Statements))
-		}
+	if ident.Name.Value != "test" {
+		t.Errorf("identifier not %s. got=%s", "test", ident.Name.Value)
+	}
 
-		stmt := program.Statements[0]
-		if !testAssignStatement(t, stmt, tt.expectedIdentifier) {
-			return
-		}
-
-		val := stmt.(*ast.AssignStatement).Value
-		if !testLiteralExpression(t, val, tt.expectedValue) {
-			return
-		}
+	if ident.Value.TokenLiteral() != "5" {
+		t.Errorf("ident.TokenLiteral not %s. got=%s", "5", ident.TokenLiteral())
 	}
 }
 
@@ -641,56 +637,6 @@ func checkParserErrors(t *testing.T, p *Parser) {
 		t.Errorf("parser error: %q", msg)
 	}
 	t.FailNow()
-}
-
-func testDeclareStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != ":=" {
-		t.Errorf("s.TokenLiteral not ':='. got=%q", s.TokenLiteral())
-		return false
-	}
-
-	letStmt, ok := s.(*ast.DeclareStatement)
-	if !ok {
-		t.Errorf("s not *ast.DeclareStatement. got=%T", s)
-		return false
-	}
-
-	if letStmt.Name.Value != name {
-		t.Errorf("letStmt.Name.Value not '%s'. got=%s", name, letStmt.Name.Value)
-		return false
-	}
-
-	if letStmt.Name.TokenLiteral() != name {
-		t.Errorf("s.Name not '%s'. got=%s", name, letStmt.Name)
-		return false
-	}
-
-	return true
-}
-
-func testAssignStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "=" {
-		t.Errorf("s.TokenLiteral not '='. got=%q", s.TokenLiteral())
-		return false
-	}
-
-	letStmt, ok := s.(*ast.AssignStatement)
-	if !ok {
-		t.Errorf("s not *ast.AssignStatement. got=%T", s)
-		return false
-	}
-
-	if letStmt.Name.Value != name {
-		t.Errorf("letStmt.Name.Value not '%s'. got=%s", name, letStmt.Name.Value)
-		return false
-	}
-
-	if letStmt.Name.TokenLiteral() != name {
-		t.Errorf("s.Name not '%s'. got=%s", name, letStmt.Name)
-		return false
-	}
-
-	return true
 }
 
 func testInfixExpression(t *testing.T, exp ast.Expression, left interface{}, operator string, right interface{}) bool {

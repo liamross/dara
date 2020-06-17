@@ -8,21 +8,18 @@ import (
 func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
-			&DeclareStatement{
-				Token: token.Token{Type: token.DECLARE, Literal: ":="},
-				Name: &Identifier{
-					Token: token.Token{Type: token.IDENT, Literal: "a"},
-					Value: "a",
+			&IfStatement{
+				Token: token.Token{Type: token.DECLARE, Literal: "if"},
+				Condition: &Boolean{
+					Token: token.Token{Type: token.TRUE, Literal: "true"},
+					Value: true,
 				},
-				Value: &Identifier{
-					Token: token.Token{Type: token.IDENT, Literal: "b"},
-					Value: "b",
-				},
+				Consequence: &BlockStatement{},
 			},
 		},
 	}
 
-	if s := program.String(); s != "a := b;" {
+	if s := program.String(); s != "if true {  }" {
 		t.Errorf("program.String() wrong. Got: %q", s)
 	}
 }

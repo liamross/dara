@@ -25,6 +25,9 @@ func Eval(node ast.Node) Object {
 		return evalIfStatement(node)
 	case *ast.ReturnStatement:
 		val := Eval(node.ReturnValue)
+		if isError(val) {
+			return val
+		}
 		return &ReturnValue{Value: val}
 
 	// Expressions
@@ -38,14 +41,30 @@ func Eval(node ast.Node) Object {
 		return &String{Value: node.Value}
 	case *ast.PrefixExpression:
 		right := Eval(node.Right)
+		if isError(right) {
+			return right
+		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
 		left := Eval(node.Left)
+		if isError(left) {
+			return left
+		}
 		right := Eval(node.Right)
+		if isError(right) {
+			return right
+		}
 		return evalInfixExpression(node.Operator, left, right)
 	}
 
 	return nil
+}
+
+func isError(obj Object) bool {
+	if obj != nil {
+		return obj.Type() == ERROR_OBJ
+	}
+	return false
 }
 
 func newError(format string, a ...interface{}) *Error {
@@ -87,6 +106,9 @@ func evalBlockStatement(block *ast.BlockStatement) Object {
 
 func evalIfStatement(is *ast.IfStatement) Object {
 	condition := Eval(is.Condition)
+	if isError(condition) {
+		return condition
+	}
 
 	if condition.Type() != BOOLEAN_OBJ {
 		return newError("type mismatch: non-boolean condition %s (%s) in if statement",

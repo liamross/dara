@@ -40,47 +40,6 @@ type Statement interface {
 	statementNode()
 }
 
-type DeclareStatement struct {
-	Token token.Token
-	Name  *Identifier
-	Value Expression
-}
-
-func (ds *DeclareStatement) statementNode()       {}
-func (ds *DeclareStatement) TokenLiteral() string { return ds.Token.Literal }
-func (ds *DeclareStatement) String() string {
-	var out bytes.Buffer
-
-	out.WriteString(ds.Name.String())
-
-	if _, ok := ds.Value.(*Nil); !ok {
-		out.WriteString(" " + ds.TokenLiteral() + " ")
-		out.WriteString(ds.Value.String())
-	}
-
-	out.WriteString(";")
-
-	return out.String()
-}
-
-type AssignStatement struct {
-	Token token.Token
-	Name  *Identifier
-	Value Expression
-}
-
-func (as *AssignStatement) statementNode()       {}
-func (as *AssignStatement) TokenLiteral() string { return as.Token.Literal }
-func (as *AssignStatement) String() string {
-	var out bytes.Buffer
-
-	out.WriteString(as.Name.String())
-	out.WriteString(" = ")
-	out.WriteString(as.Value.String())
-
-	return out.String()
-}
-
 type ExpressionStatement struct {
 	Token      token.Token
 	Expression Expression
@@ -94,6 +53,15 @@ func (es *ExpressionStatement) String() string {
 	}
 	return ""
 }
+
+type CommentStatement struct {
+	Token token.Token
+	Value string
+}
+
+func (cs *CommentStatement) statementNode()       {}
+func (cs *CommentStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *CommentStatement) String() string       { return cs.Value }
 
 type ReturnStatement struct {
 	Token       token.Token
@@ -297,6 +265,47 @@ func (ce *CallExpression) String() string {
 	out.WriteString("(")
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
+
+	return out.String()
+}
+
+type DeclareExpression struct {
+	Token token.Token
+	Name  *Identifier
+	Value Expression
+}
+
+func (de *DeclareExpression) expressionNode()      {}
+func (de *DeclareExpression) TokenLiteral() string { return de.Token.Literal }
+func (de *DeclareExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(de.Name.String())
+
+	if _, ok := de.Value.(*Nil); !ok {
+		out.WriteString(" " + de.TokenLiteral() + " ")
+		out.WriteString(de.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+type AssignExpression struct {
+	Token token.Token
+	Name  *Identifier
+	Value Expression
+}
+
+func (ae *AssignExpression) expressionNode()      {}
+func (ae *AssignExpression) TokenLiteral() string { return ae.Token.Literal }
+func (ae *AssignExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ae.Name.String())
+	out.WriteString(" " + ae.TokenLiteral() + " ")
+	out.WriteString(ae.Value.String())
 
 	return out.String()
 }
