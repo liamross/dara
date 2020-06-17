@@ -1,6 +1,11 @@
 package evaluator
 
-import "fmt"
+import (
+	"bytes"
+	"dara/ast"
+	"fmt"
+	"strings"
+)
 
 type ObjectType string
 
@@ -11,6 +16,7 @@ const (
 	NIL_OBJ          ObjectType = "nil"
 	RETURN_VALUE_OBJ ObjectType = "return_value"
 	ERROR_OBJ        ObjectType = "error"
+	FUNCTION_OBJ     ObjectType = "fn"
 )
 
 type Object interface {
@@ -55,5 +61,29 @@ type Error struct {
 	Message string
 }
 
-func (e *Error) Type() ObjectType { return RETURN_VALUE_OBJ }
+func (e *Error) Type() ObjectType { return ERROR_OBJ }
 func (e *Error) Inspect() string  { return e.Message }
+
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
+func (f *Function) Inspect() string {
+	var out bytes.Buffer
+
+	params := make([]string, len(f.Parameters))
+	for i, p := range f.Parameters {
+		params[i] = p.String()
+	}
+
+	out.WriteString("fn (")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(f.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
+}

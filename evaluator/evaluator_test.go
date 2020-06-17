@@ -116,7 +116,7 @@ func TestBangOperator(t *testing.T) {
 	}
 }
 
-func TestIfElseExpressions(t *testing.T) {
+func TestIfElseExpression(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -144,6 +144,38 @@ func TestIfElseExpressions(t *testing.T) {
 	}
 }
 
+func TestDefineExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"a := 5; a;", 5},
+		{"a := 5 * 5; a;", 25},
+		{"a := 5; b := a; b;", 5},
+		{"a := 5; b := a; c := a + b + 5; c;", 15},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testNumberObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestAssignExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"a := 5; a := 25; a;", 25},
+		{"a := 5; b := a; a = a + b + 5; a;", 15},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testNumberObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -165,6 +197,56 @@ func TestReturnStatements(t *testing.T) {
 		evaluated := testEval(tt.input)
 		testNumberObject(t, evaluated, tt.expected)
 	}
+}
+
+func TestFunctionObject(t *testing.T) {
+	input := "fn(x) { x + 2; };"
+
+	evaluated := testEval(input)
+	fn, ok := evaluated.(*Function)
+	if !ok {
+		t.Fatalf("object is not Function. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(fn.Parameters) != 1 {
+		t.Fatalf("function has wrong parameters. Parameters=%+v",
+			fn.Parameters)
+	}
+
+	if fn.Parameters[0].String() != "x" {
+		t.Fatalf("parameter is not 'x'. got=%q", fn.Parameters[0])
+	}
+
+	expectedBody := "(x + 2)"
+	if fn.Body.String() != expectedBody {
+		t.Fatalf("body is not %q. got=%q", expectedBody, fn.Body.String())
+	}
+}
+
+func TestFunctionApplication(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"identity := fn(x) { x; }; identity(5);", 5},
+		{"identity := fn(x) { return x; }; identity(5);", 5},
+		{"double := fn(x) { x * 2; }; double(5);", 10},
+		{"add := fn(x, y) { x + y; }; add(5, 5);", 10},
+		{"add := fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+		{"fn(x) { x; }(5)", 5},
+	}
+	for _, tt := range tests {
+		testNumberObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func TestClosures(t *testing.T) {
+	input := `
+   newAdder := fn(x) {
+     fn(y) { x + y };
+};
+addTwo := newAdder(2); addTwo(2);`
+	testNumberObject(t, testEval(input), 4)
 }
 
 func TestErrorHandling(t *testing.T) {
@@ -220,6 +302,18 @@ func TestErrorHandling(t *testing.T) {
 				return 1;
 			}`,
 			"invalid operation: operator + is not defined for true (boolean)",
+		},
+		{
+			"foobar",
+			"undeclared name: foobar",
+		},
+		{
+			"foobar = 5",
+			"undeclared name: foobar",
+		},
+		{
+			"a := 5; 5()",
+			"invalid operation: can not call non-function (number)",
 		},
 	}
 
@@ -288,6 +382,7 @@ func testEval(input string) Object {
 		l       = lexer.New(input)
 		p       = parser.New(l)
 		program = p.ParseProgram()
+		env     = NewEnvironment()
 	)
-	return Eval(program)
+	return Eval(program, env)
 }

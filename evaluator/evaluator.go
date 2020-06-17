@@ -12,19 +12,23 @@ var (
 	FALSE = &Boolean{Value: false}
 )
 
-func Eval(node ast.Node) Object {
+func Eval(node ast.Node, env *Environment) Object {
 	switch node := node.(type) {
 	// Statements
 	case *ast.Program:
-		return evalProgram(node)
+		return evalProgram(node, env)
+
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return Eval(node.Expression, env)
+
 	case *ast.BlockStatement:
-		return evalBlockStatement(node)
+		return evalBlockStatement(node, env)
+
 	case *ast.IfStatement:
-		return evalIfStatement(node)
+		return evalIfStatement(node, env)
+
 	case *ast.ReturnStatement:
-		val := Eval(node.ReturnValue)
+		val := Eval(node.ReturnValue, env)
 		if isError(val) {
 			return val
 		}
@@ -33,28 +37,62 @@ func Eval(node ast.Node) Object {
 	// Expressions
 	case *ast.NumberLiteral:
 		return &Number{Value: node.Value}
+
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
-	case *ast.Nil:
-		return &Nil{}
+
 	case *ast.StringLiteral:
 		return &String{Value: node.Value}
+
+	case *ast.Nil:
+		return &Nil{}
+
 	case *ast.PrefixExpression:
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
+
 	case *ast.InfixExpression:
-		left := Eval(node.Left)
+		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
 		}
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalInfixExpression(node.Operator, left, right)
+
+	case *ast.DeclareExpression:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value, val)
+
+	case *ast.AssignExpression:
+		return evalAssignExpression(node, env)
+
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
+
+	case *ast.FunctionLiteral:
+		params := node.Parameters
+		body := node.Body
+		return &Function{Parameters: params, Env: env, Body: body}
+
+	case *ast.CallExpression:
+		function := Eval(node.Function, env)
+		if isError(function) {
+			return function
+		}
+		args := evalExpressions(node.Arguments, env)
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+		return applyFunction(function, args)
 	}
 
 	return nil
@@ -71,11 +109,11 @@ func newError(format string, a ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, a...)}
 }
 
-func evalProgram(program *ast.Program) Object {
+func evalProgram(program *ast.Program, env *Environment) Object {
 	var result Object
 
 	for _, statement := range program.Statements {
-		result = Eval(statement)
+		result = Eval(statement, env)
 
 		switch r := result.(type) {
 		case *ReturnValue:
@@ -88,11 +126,11 @@ func evalProgram(program *ast.Program) Object {
 	return result
 }
 
-func evalBlockStatement(block *ast.BlockStatement) Object {
+func evalBlockStatement(block *ast.BlockStatement, env *Environment) Object {
 	var result Object
 
 	for _, statement := range block.Statements {
-		result = Eval(statement)
+		result = Eval(statement, env)
 
 		if result != nil {
 			if rt := result.Type(); rt == RETURN_VALUE_OBJ || rt == ERROR_OBJ {
@@ -104,8 +142,8 @@ func evalBlockStatement(block *ast.BlockStatement) Object {
 	return result
 }
 
-func evalIfStatement(is *ast.IfStatement) Object {
-	condition := Eval(is.Condition)
+func evalIfStatement(is *ast.IfStatement, env *Environment) Object {
+	condition := Eval(is.Condition, env)
 	if isError(condition) {
 		return condition
 	}
@@ -115,10 +153,10 @@ func evalIfStatement(is *ast.IfStatement) Object {
 			condition.Inspect(), condition.Type())
 	}
 	if condition == TRUE {
-		return Eval(is.Consequence)
+		return Eval(is.Consequence, env)
 	}
 	if is.Alternative != nil {
-		return Eval(is.Alternative)
+		return Eval(is.Alternative, env)
 	}
 	return NIL
 }
@@ -158,6 +196,69 @@ func evalInfixExpression(operator string, left, right Object) Object {
 		return newError("invalid operation: operator %s is not defined for %s (%s)",
 			operator, left.Inspect(), left.Type())
 	}
+}
+
+func evalAssignExpression(node *ast.AssignExpression, env *Environment) Object {
+	if _, ok := env.Get(node.Name.Value); !ok {
+		return newError("undeclared name: %s", node.Name.Value)
+	}
+	val := Eval(node.Value, env)
+	if isError(val) {
+		return val
+	}
+	env.Set(node.Name.Value, val)
+	return val
+}
+
+func evalIdentifier(node *ast.Identifier, env *Environment) Object {
+	val, ok := env.Get(node.Value)
+	if !ok {
+		return newError("undeclared name: %s", node.Value)
+	}
+	return val
+}
+
+func evalExpressions(exps []ast.Expression, env *Environment) []Object {
+	var result []Object
+
+	for _, e := range exps {
+		evaluated := Eval(e, env)
+		if isError(evaluated) {
+			return []Object{evaluated}
+		}
+		result = append(result, evaluated)
+	}
+
+	return result
+}
+
+func applyFunction(fn Object, args []Object) Object {
+	function, ok := fn.(*Function)
+	if !ok {
+		return newError("invalid operation: can not call non-function (%s)", fn.Type())
+	}
+	var (
+		extendedEnv = extendedFunctionEnv(function, args)
+		evaluated   = Eval(function.Body, extendedEnv)
+	)
+	return unwrapReturnValue(evaluated)
+}
+
+func extendedFunctionEnv(fn *Function, args []Object) *Environment {
+	env := NewScopedEnvironment(fn.Env)
+
+	for i, param := range fn.Parameters {
+		env.Set(param.Value, args[i])
+	}
+
+	return env
+}
+
+func unwrapReturnValue(obj Object) Object {
+	if returnValue, ok := obj.(*ReturnValue); ok {
+		return returnValue.Value
+	}
+	return obj
 }
 
 func evalBangOperatorExpression(right Object) Object {
