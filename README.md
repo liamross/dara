@@ -59,6 +59,11 @@ add = fn(a, b) {
     return a + b;
 }
 
+// Can immediately invoke functions.
+twenty = fn(num) {
+    return num * 2;
+}(10)
+
 // No brackets around the logic in if statements. No truthy or falsy values,
 // must use booleans in if statements.
 if 1 > 2 {
