@@ -36,10 +36,11 @@ maintaining high levels of readability.
 ### In progress
 
 - [ ] Implement evaluator
-- [ ] Implement parsing objects and arrays
+- [ ] Implement parsing objects
 
 ### To Do (roughly in order)
 
+- [ ] Special indexing operations for specific array elements (`array[1:2]`, etc)
 - [ ] Add line numbers to evaluator error reporting
 - [ ] **Remove all semicolons**
 - [ ] Build a compiler (stretch goal)
@@ -82,16 +83,22 @@ if 1 > 2 {
 
 /* Dara also allows multi-line comments using c-style syntax. */
 
-// Available types:
+// Available logical operators:
+// < > ! == != >= <= && ||   (work on strings: < > == != >= <=)
+
+// Available arithmetic operators:
+//  + - * / %                (work on strings: +)
+
+// Built in types:
 noValue := nil;
 string := "string";
 number := 1.234;
 function := fn(a, b) { return a + b; };
 array := [1, 2, 3, 4];
 
-// Available logical operators:
-// < > ! == != >= <= && ||   (work on strings: < > == != >= <=)
+// Built in functions:
 
-// Available arithmetic operators:
-//  + - * / %                (work on strings: +)
+// len()
+five := len("Hello");
+five = len([1, 2, 3, 4, 5])
 ```

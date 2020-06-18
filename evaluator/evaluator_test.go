@@ -166,7 +166,7 @@ func TestAssignExpression(t *testing.T) {
 		input    string
 		expected float64
 	}{
-		{"a := 5; a := 25; a;", 25},
+		{"a := 5; a = 25; a;", 25},
 		{"a := 5; b := a; a = a + b + 5; a;", 15},
 	}
 
@@ -209,8 +209,7 @@ func TestFunctionObject(t *testing.T) {
 	}
 
 	if len(fn.Parameters) != 1 {
-		t.Fatalf("function has wrong parameters. Parameters=%+v",
-			fn.Parameters)
+		t.Fatalf("function has wrong parameters. Parameters=%+v", fn.Parameters)
 	}
 
 	if fn.Parameters[0].String() != "x" {
@@ -220,6 +219,50 @@ func TestFunctionObject(t *testing.T) {
 	expectedBody := "(x + 2)"
 	if fn.Body.String() != expectedBody {
 		t.Fatalf("body is not %q. got=%q", expectedBody, fn.Body.String())
+	}
+}
+
+func TestArrayLiterals(t *testing.T) {
+	input := "[1, 2 + 3]"
+
+	evaluated := testEval(input)
+	array, ok := evaluated.(*Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(array.Elements) != 2 {
+		t.Fatalf("array has wrong number of elements (%d)", len(array.Elements))
+	}
+
+	testNumberObject(t, array.Elements[0], 1)
+	testNumberObject(t, array.Elements[1], 5)
+}
+
+func TestArrayIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"[1, 2, 3][0]", 1},
+		{"[1, 2, 3][1]", 2},
+		{"[1, 2, 3][2]", 3},
+		{"i := 0; [1][i];", 1},
+		{"[1, 2, 3][1 + 1];", 3},
+		{"myArray := [1, 2, 3]; myArray[2];", 3},
+		{"myArray := [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6},
+		{"myArray := [1, 2, 3]; i := myArray[0]; myArray[i]", 2},
+		{"[1, 2, 3][3]", nil},
+		{"[1, 2, 3][3]", nil},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testNumberObject(t, evaluated, float64(integer))
+		} else {
+			testNilObject(t, evaluated)
+		}
 	}
 }
 
@@ -247,6 +290,22 @@ func TestClosures(t *testing.T) {
 };
 addTwo := newAdder(2); addTwo(2);`
 	testNumberObject(t, testEval(input), 4)
+}
+
+func TestBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("hello world")`, 11},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testNumberObject(t, evaluated, tt.expected)
+	}
 }
 
 func TestErrorHandling(t *testing.T) {
@@ -314,6 +373,22 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"a := 5; 5()",
 			"invalid operation: can not call non-function (number)",
+		},
+		{
+			"a := 5; a := 6",
+			"invalid operation: can not redeclare a",
+		},
+		{
+			`len(1)`,
+			"invalid argument: 1 (number) for len",
+		},
+		{
+			`len("one", "two")`,
+			"invalid operation: too many arguments for len (expected 1, found 2)",
+		},
+		{
+			`[1, 2, 3]["hey"]`,
+			"type mismatch: non-number \"hey\" (string) can not index an array",
 		},
 	}
 

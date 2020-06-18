@@ -44,6 +44,24 @@ func Eval(node ast.Node, env *Environment) Object {
 	case *ast.StringLiteral:
 		return &String{Value: node.Value}
 
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &Array{Elements: elements}
+
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
+
 	case *ast.Nil:
 		return &Nil{}
 
@@ -66,11 +84,7 @@ func Eval(node ast.Node, env *Environment) Object {
 		return evalInfixExpression(node.Operator, left, right)
 
 	case *ast.DeclareExpression:
-		val := Eval(node.Value, env)
-		if isError(val) {
-			return val
-		}
-		env.Set(node.Name.Value, val)
+		return evalDeclareExpression(node, env)
 
 	case *ast.AssignExpression:
 		return evalAssignExpression(node, env)
@@ -198,6 +212,18 @@ func evalInfixExpression(operator string, left, right Object) Object {
 	}
 }
 
+func evalDeclareExpression(node *ast.DeclareExpression, env *Environment) Object {
+	if _, ok := env.Get(node.Name.Value); ok {
+		return newError("invalid operation: can not redeclare %s", node.Name.Value)
+	}
+	val := Eval(node.Value, env)
+	if isError(val) {
+		return val
+	}
+	env.Set(node.Name.Value, val)
+	return val
+}
+
 func evalAssignExpression(node *ast.AssignExpression, env *Environment) Object {
 	if _, ok := env.Get(node.Name.Value); !ok {
 		return newError("undeclared name: %s", node.Name.Value)
@@ -211,11 +237,13 @@ func evalAssignExpression(node *ast.AssignExpression, env *Environment) Object {
 }
 
 func evalIdentifier(node *ast.Identifier, env *Environment) Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("undeclared name: %s", node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+	return newError("undeclared name: %s", node.Value)
 }
 
 func evalExpressions(exps []ast.Expression, env *Environment) []Object {
@@ -232,16 +260,46 @@ func evalExpressions(exps []ast.Expression, env *Environment) []Object {
 	return result
 }
 
+func evalIndexExpression(left, index Object) Object {
+	switch {
+	case left.Type() == ARRAY_OBJ && index.Type() == NUMBER_OBJ:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return newError("type mismatch: non-number %s (%s) can not index an array",
+			index.Inspect(), index.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index Object) Object {
+	var (
+		a   = array.(*Array)
+		i   = int(index.(*Number).Value)
+		max = len(a.Elements) - 1
+	)
+
+	// TODO: error if decimals on index?
+	// https://stackoverflow.com/a/16534885
+
+	if i < 0 || i > max {
+		return NIL
+	}
+
+	return a.Elements[i]
+}
+
 func applyFunction(fn Object, args []Object) Object {
-	function, ok := fn.(*Function)
-	if !ok {
+	switch function := fn.(type) {
+	case *Function:
+		var (
+			extendedEnv = extendedFunctionEnv(function, args)
+			evaluated   = Eval(function.Body, extendedEnv)
+		)
+		return unwrapReturnValue(evaluated)
+	case *Builtin:
+		return function.Fn(args...)
+	default:
 		return newError("invalid operation: can not call non-function (%s)", fn.Type())
 	}
-	var (
-		extendedEnv = extendedFunctionEnv(function, args)
-		evaluated   = Eval(function.Body, extendedEnv)
-	)
-	return unwrapReturnValue(evaluated)
 }
 
 func extendedFunctionEnv(fn *Function, args []Object) *Environment {

@@ -44,10 +44,12 @@ const (
 	COMMA     TokenType = ","
 	SEMICOLON TokenType = ";"
 
-	LPAREN TokenType = "("
-	RPAREN TokenType = ")"
-	LBRACE TokenType = "{"
-	RBRACE TokenType = "}"
+	LPAREN   TokenType = "("
+	RPAREN   TokenType = ")"
+	LBRACE   TokenType = "{"
+	RBRACE   TokenType = "}"
+	LBRACKET TokenType = "["
+	RBRACKET TokenType = "]"
 
 	// Keywords.
 	FUNCTION TokenType = "fn"

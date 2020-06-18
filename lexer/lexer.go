@@ -62,6 +62,10 @@ func (l *Lexer) NextToken() *token.Token {
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
+	case '[':
+		tok = newToken(token.LBRACKET, l.ch)
+	case ']':
+		tok = newToken(token.RBRACKET, l.ch)
 	case '%':
 		tok = newToken(token.MOD, l.ch)
 
@@ -199,7 +203,7 @@ func (l *Lexer) string(end byte) string {
 
 	if l.isAtEnd() {
 		// TODO: Unterminated string error.
-		fmt.Println("Unterminated string error")
+		fmt.Println("string literal not terminated")
 		return literal
 	}
 
@@ -235,7 +239,7 @@ func (l *Lexer) blockComment() string {
 
 	if l.isAtEnd() {
 		// TODO: Unterminated block comment error.
-		fmt.Println("Unterminated block comment error")
+		fmt.Println("comment not terminated")
 		return literal
 	}
 
