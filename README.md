@@ -16,6 +16,14 @@ like to use. It draws heavily on Go, JavaScript and Rust syntax (in that order)
 and aims to reduce the amount of code needed to achieve things, while
 maintaining high levels of readability.
 
+> Dara was written while following along with the book
+> [Writing an Interpreter in Go](https://interpreterbook.com/). As such, most of
+> the core architecture will be similar (or even identical). However, the actual
+> language has been adapted to have a more friendly syntax and far more features
+> than Monkey, the language you build in the book. I highly recommend reading it
+> if you've ever been interested in how programming languages work under the
+> hood.
+
 ## Status
 
 ### Completed
@@ -79,6 +87,7 @@ noValue := nil;
 string := "string";
 number := 1.234;
 function := fn(a, b) { return a + b; };
+array := [1, 2, 3, 4];
 
 // Available logical operators:
 // < > ! == != >= <= && ||   (work on strings: < > == != >= <=)
