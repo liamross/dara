@@ -41,6 +41,7 @@ maintaining high levels of readability.
 ### To Do (roughly in order)
 
 - [ ] Special indexing operations for specific array elements (`array[1:2]`, etc)
+- [ ] Spread operators for arrays and objects
 - [ ] Add line numbers to evaluator error reporting
 - [ ] **Remove all semicolons**
 - [ ] Build a compiler (stretch goal)
