@@ -91,11 +91,15 @@ if 1 > 2 {
 //  + - * / %                (work on strings: +)
 
 // Built in types:
-noValue := nil;
-string := "string";
-number := 1.234;
+noValue  := nil;
+string   := "string";
+number   := 1.234;
 function := fn(a, b) { return a + b; };
-array := [1, 2, 3, 4];
+array    := [1, 2, 3, 4];
+boolean  := true;
+
+// TODO types:
+object   := {a: "a"};
 
 // Built in functions:
 
