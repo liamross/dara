@@ -43,6 +43,7 @@ const (
 	// Delimiters.
 	COMMA     TokenType = ","
 	SEMICOLON TokenType = ";"
+	NEWLINE   TokenType = "\n"
 
 	LPAREN   TokenType = "("
 	RPAREN   TokenType = ")"
