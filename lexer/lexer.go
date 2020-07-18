@@ -44,6 +44,8 @@ func (l *Lexer) NextToken() *token.Token {
 	l.skipWhitespace()
 
 	switch l.ch {
+	case '\n':
+		tok = newToken(token.NEWLINE, l.ch)
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '*':
@@ -132,10 +134,7 @@ func (l *Lexer) NextToken() *token.Token {
 }
 
 func (l *Lexer) skipWhitespace() {
-	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
-		if l.ch == '\n' {
-			l.line++
-		}
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' {
 		l.advance()
 	}
 }
